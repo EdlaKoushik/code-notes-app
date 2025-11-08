@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code Notes App</title>
+  <title>Code Notes Explorer</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Code Notes</h1>
-    <textarea id="noteInput" placeholder="Write your code here..."></textarea>
-    <button onclick="saveNote()">Save Note</button>
-    <div id="notesList"></div>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="viewer">
+      <h2 id="filePath">Select a file</h2>
+      <pre><code id="codeDisplay" class="language-java"></code></pre>
+    </main>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
