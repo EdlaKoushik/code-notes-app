@@ -1,21 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code Notes Explorer</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Notes App</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar" id="sidebar"></aside>
-    <main class="viewer">
-      <h2 id="filePath">Select a file</h2>
-      <pre><code id="codeDisplay" class="language-java"></code></pre>
-    </main>
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
-  <script src="script.js"></script>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">📝</div>
+            <h1>Advanced Notes</h1>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active">
+                <i>📋</i>
+                <span>All Notes</span>
+            </div>
+            <div class="menu-item">
+                <i>⭐</i>
+                <span>Starred</span>
+            </div>
+            <div class="menu-item">
+                <i>🔔</i>
+                <span>Reminders</span>
+            </div>
+            <div class="menu-item">
+                <i>🏷️</i>
+                <span>Tags</span>
+            </div>
+            <div class="menu-item">
+                <i>🗑️</i>
+                <span>Trash</span>
+            </div>
+
+            <div class="folders-section">
+                <div class="section-title">Folders</div>
+                <div class="folder active">
+                    <i>📁</i>
+                    <span>Personal</span>
+                </div>
+                <div class="folder">
+                    <i>📁</i>
+                    <span>Work</span>
+                </div>
+                <div class="folder">
+                    <i>📁</i>
+                    <span>Coding</span>
+                </div>
+                <div class="folder">
+                    <i>📁</i>
+                    <span>Ideas</span>
+                </div>
+                <div class="add-folder-btn">
+                    <i>➕</i>
+                    <span>New Folder</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="search-bar">
+                <i>🔍</i>
+                <input type="text" placeholder="Search notes...">
+            </div>
+            <div class="user-actions">
+                <button class="btn btn-outline" id="themeToggle">
+                    <i>🌙</i>
+                    <span>Theme</span>
+                </button>
+                <button class="btn btn-primary" id="newNoteBtn">
+                    <i>➕</i>
+                    <span>New Note</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="notes-container">
+            <div class="notes-header">
+                <h2>Recent Notes</h2>
+                <div class="view-options">
+                    <button class="btn btn-outline" id="toggleView">
+                        <i>📋</i>
+                        <span>List View</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="notes-grid" id="notesGrid">
+                <div class="note-card">
+                    <div class="note-tag">Personal</div>
+                    <h3>Meeting Notes</h3>
+                    <p>Discussed project timeline and deliverables for Q3. Need to follow up with design team about the new UI components.</p>
+                    <div class="note-meta">
+                        <span>Yesterday</span>
+                        <span>📎 2</span>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-tag">Coding</div>
+                    <h3>React Hooks Guide</h3>
+                    <p>useState, useEffect, useContext, useReducer, useMemo, useCallback, useRef, custom hooks.</p>
+                    <div class="note-meta">
+                        <span>2 days ago</span>
+                        <span>📎 1</span>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-tag">Ideas</div>
+                    <h3>App Improvement Ideas</h3>
+                    <p>Dark mode, export functionality, collaboration features, mobile app, AI-powered suggestions.</p>
+                    <div class="note-meta">
+                        <span>Last week</span>
+                        <span>📎 0</span>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-tag">Work</div>
+                    <h3>Project Requirements</h3>
+                    <p>User authentication, real-time updates, file uploads, responsive design, accessibility compliance.</p>
+                    <div class="note-meta">
+                        <span>Mar 12</span>
+                        <span>📎 3</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor-header">
+                    <input type="text" class="editor-title" placeholder="Note Title" value="Meeting Notes">
+                </div>
+                <div class="editor-toolbar">
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" data-command="bold" title="Bold">B</button>
+                        <button class="toolbar-btn" data-command="italic" title="Italic">I</button>
+                        <button class="toolbar-btn" data-command="underline" title="Underline">U</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" data-command="formatBlock" data-value="h1" title="Heading 1">H1</button>
+                        <button class="toolbar-btn" data-command="formatBlock" data-value="h2" title="Heading 2">H2</button>
+                        <button class="toolbar-btn" data-command="formatBlock" data-value="h3" title="Heading 3">H3</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" data-command="insertUnorderedList" title="Bullet List">•</button>
+                        <button class="toolbar-btn" data-command="insertOrderedList" title="Numbered List">1.</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" data-command="justifyLeft" title="Align Left">⫷</button>
+                        <button class="toolbar-btn" data-command="justifyCenter" title="Align Center">⫸</button>
+                        <button class="toolbar-btn" data-command="justifyRight" title="Align Right">⫹</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" id="insertImage" title="Insert Image">🖼️</button>
+                        <button class="toolbar-btn" id="pasteScreenshot" title="Paste Screenshot">📸</button>
+                    </div>
+                </div>
+                <div class="editor-content" contenteditable="true" id="editorContent">
+                    <h2>Project Meeting - March 15, 2023</h2>
+                    <p><strong>Attendees:</strong> John, Sarah, Michael, Lisa</p>
+                    
+                    <h3>Agenda Items:</h3>
+                    <ul>
+                        <li>Q3 Project Timeline Review</li>
+                        <li>Design System Updates</li>
+                        <li>Technical Debt Discussion</li>
+                        <li>Team Resource Allocation</li>
+                    </ul>
+                    
+                    <h3>Action Items:</h3>
+                    <ol>
+                        <li>Sarah to follow up with design team about UI components (Due: March 20)</li>
+                        <li>Michael to create technical specification document (Due: March 22)</li>
+                        <li>John to review resource allocation with HR (Due: March 18)</li>
+                    </ol>
+                    
+                    <p><em>Next meeting scheduled for March 29, 2023</em></p>
+                </div>
+                <div class="editor-footer">
+                    <div class="editor-info">
+                        Last edited: 2 hours ago
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn btn-outline" id="saveDraft">Save Draft</button>
+                        <button class="btn btn-primary" id="saveNote">Save Note</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Folder Modal -->
+    <div class="modal" id="folderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Folder</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="folderName">Folder Name</label>
+                <input type="text" id="folderName" class="form-control" placeholder="Enter folder name">
+            </div>
+            <div class="form-group">
+                <label for="folderColor">Color</label>
+                <select id="folderColor" class="form-control">
+                    <option value="#4361ee">Blue</option>
+                    <option value="#f72585">Pink</option>
+                    <option value="#4cc9f0">Cyan</option>
+                    <option value="#7209b7">Purple</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary" id="createFolder">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
