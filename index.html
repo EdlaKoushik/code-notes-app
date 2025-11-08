@@ -3,73 +3,95 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rich Notes — Single File App</title>
+  <title>RichNotes — Production-ready Single File App</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1320;--muted:#94a3b8;--accent:#6ee7b7;--panel:#071029}
-    *{box-sizing:border-box;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071029 0%,#071a2b 60%);color:#e6eef6}
-    .app{display:grid;grid-template-columns:320px 340px 1fr;gap:12px;height:100vh;padding:14px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    :root{--bg:#0f1724;--card:#0b1320;--muted:#94a3b8;--accent:#6ee7b7;--panel:#071029;--danger:#ff6b6b;--success:#57d38a;--info:#60a5fa}
+    [data-theme='light']{--bg:#f6f9fc;--card:#ffffff;--muted:#475569;--accent:#0ea5a6;--panel:#f1f5f9;--danger:#ef4444;--success:#16a34a;--info:#2563eb}
+    [data-theme='solar']{--bg:#fff8e7;--card:#fff6e0;--muted:#6b4f1d;--accent:#f59e0b;--panel:#fff4d6;--danger:#b91c1c;--success:#15803d;--info:#92400e}
+
+    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071a2b 60%);color:var(--muted);transition:background .25s,color .2s}
+    .app{display:grid;grid-template-columns:320px 360px 1fr;gap:12px;height:100vh;padding:12px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px;padding:12px;box-shadow:0 8px 28px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);color:inherit}
     header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-    header h1{font-size:16px;margin:0}
+    header h1{font-size:16px;margin:0;color:var(--muted)}
     .toolbar{display:flex;gap:8px;align-items:center}
-    .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;color:var(--muted);cursor:pointer}
-    .btn:hover{border-color:rgba(255,255,255,0.08);color:#fff}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer;font-weight:600}
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#38bdf8);color:#042023;border:none}
+    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.04)}
     .muted{color:var(--muted);font-size:13px}
+    .small{font-size:13px}
+    .tiny{font-size:12px;padding:6px 8px}
+
     /* Sidebar tree */
     .sidebar{display:flex;flex-direction:column;height:100%}
-    .folders{overflow:auto;padding:8px;margin-top:6px}
-    .folder{padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .folders{overflow:auto;padding:8px;margin-top:8px}
+    .folder{padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid transparent}
+    .folder.dragging{opacity:0.6;border:1px dashed rgba(255,255,255,0.12);transform:scale(.995)}
+    .folder.drop-target{background:rgba(255,255,255,0.02);outline:2px dashed rgba(255,255,255,0.06)}
     .folder .left{display:flex;gap:8px;align-items:center}
     .folder .name{cursor:pointer}
-    .folder .actions{display:flex;gap:6px}
-    .tiny{font-size:12px;padding:4px 6px}
+    .folder .name strong{color:inherit}
+
     /* Notes list */
     .notes-list{display:flex;flex-direction:column;height:100%}
     .notes-header{display:flex;justify-content:space-between;align-items:center}
     .list{overflow:auto;margin-top:8px}
-    .note-item{padding:10px;border-radius:8px;margin-bottom:8px;cursor:pointer}
-    .note-item.active{background:linear-gradient(90deg,rgba(255,255,255,0.02),transparent);border:1px solid rgba(255,255,255,0.03)}
+    .note-item{padding:10px;border-radius:8px;margin-bottom:8px;cursor:pointer;background:transparent}
+    .note-item:hover{background:rgba(255,255,255,0.02)}
+    .note-item.active{background:linear-gradient(90deg,rgba(255,255,255,0.03),transparent);border:1px solid rgba(255,255,255,0.04)}
+
     /* Editor */
     .editor{display:flex;flex-direction:column;height:100%}
     .edit-toolbar{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:8px}
     .editor-area{flex:1;overflow:auto;border-radius:10px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);min-height:200px}
-    .content{min-height:400px;outline:none}
-    /* Tree style */
-    .tree-node{padding-left:12px}
-    .caret{cursor:pointer;user-select:none}
-    .hidden{display:none}
-    /* search */
-    input[type="search"],input[type="text"],select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;color:#e6eef6}
-    .controls{display:flex;gap:8px}
-    .small{font-size:13px}
-    /* responsive */
-    @media (max-width:1000px){.app{grid-template-columns:1fr}.notes-list{display:none}.app>.card:nth-child(2){display:none}}
+    .content{min-height:400px;outline:none;background:transparent;white-space:pre-wrap}
+    .note-top{display:flex;gap:8px;align-items:center}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;z-index:10000}
+    .modal{background:var(--card);padding:18px;border-radius:12px;min-width:300px;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+
+    /* toast */
+    .toast-wrap{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+    .toast{padding:10px 14px;border-radius:10px;color:#042023;background:var(--success);box-shadow:0 6px 18px rgba(0,0,0,0.3);min-width:180px;display:flex;gap:8px;align-items:center}
+    .toast.info{background:var(--info);color:#fff}
+    .toast.danger{background:var(--danger);color:#fff}
+    .toast .icon{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center}
+
+    /* small screens */
+    @media (max-width:1100px){.app{grid-template-columns:1fr;grid-auto-rows:auto;overflow:auto}.notes-list{order:3}.card{margin-bottom:12px}}
   </style>
 </head>
-<body>
+<body data-theme="dark">
   <div class="app">
-    <!-- Sidebar: folders tree -->
+    <!-- Sidebar -->
     <div class="card sidebar" id="sidebar">
       <header>
         <div>
           <h1>RichNotes</h1>
-          <div class="muted">Local, single-file deploy — GitHub Pages ready</div>
+          <div class="muted">Responsive · Themes · Drag folders · Keyboard nav · Confirm modals</div>
         </div>
       </header>
-      <div style="display:flex;gap:8px;align-items:center">
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
         <input id="search" type="search" placeholder="Search notes or folders..." style="flex:1" />
-        <button class="btn tiny" id="exportBtn">Export</button>
-        <button class="btn tiny" id="importBtn">Import</button>
+        <button class="btn primary" id="globalNewNote">+ New</button>
       </div>
 
-      <div style="display:flex;gap:8px;margin-top:8px">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
         <button class="btn" id="newFolderBtn">+ Folder</button>
-        <button class="btn" id="newNoteBtn">+ Note</button>
+        <button class="btn" id="themeBtn">Theme</button>
+        <select id="quickCreateSelect" style="width:140px">
+          <option value="note">Quick: Note</option>
+          <option value="code">Quick: Code Snippet</option>
+          <option value="todo">Quick: Todo</option>
+        </select>
       </div>
 
       <div class="folders" id="folders"></div>
-      <div style="margin-top:10px;color:var(--muted);font-size:13px">Tip: drag images or paste screenshots into editor. Data lives locally (IndexedDB).</div>
+      <div style="margin-top:10px;color:var(--muted);font-size:13px">Tip: drag folders to nest them. Use arrow keys to navigate notes/folders, Enter to open, Delete to remove an item.</div>
     </div>
 
     <!-- Notes list -->
@@ -116,336 +138,179 @@
           </label>
         </div>
         <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-          <button class="btn" id="saveBtn">Save</button>
+          <button class="btn primary" id="saveBtn">Save</button>
           <button class="btn" id="deleteNoteBtn">Delete</button>
-          <button class="btn" id="exportNoteBtn">Export Note</button>
+          <button class="btn" id="exportNoteBtn">Export</button>
         </div>
       </div>
 
-      <div style="padding:8px 12px;display:flex;gap:8px;align-items:center">
+      <div style="padding:8px 12px;display:flex;gap:8px;align-items:center" class="note-top">
         <input id="noteTitle" type="text" placeholder="Note title..." style="flex:1" />
         <div class="muted small" id="noteMeta">new</div>
       </div>
 
       <div class="editor-area">
-        <div id="content" class="content" contenteditable="true" spellcheck="false" placeholder="Start typing...">
-        </div>
+        <div id="content" class="content" contenteditable="true" spellcheck="false" placeholder="Start typing..."></div>
       </div>
 
     </div>
   </div>
 
+  <!-- Modal -->
+  <div id="modalRoot" style="display:none"></div>
+  <div class="toast-wrap" id="toasts"></div>
   <input id="fileInput" type="file" accept="application/json" style="display:none" />
   <input id="imageInput" type="file" accept="image/*" style="display:none" />
 
   <script>
-  // ======= Simple IndexedDB wrapper =======
-  const DB_NAME = 'richnotes-db';
-  const DB_STORE = 'items';
-  let db;
-  function openDB(){
-    return new Promise((res,rej)=>{
-      const r = indexedDB.open(DB_NAME,1);
-      r.onupgradeneeded = e => {
-        const d = e.target.result;
-        if(!d.objectStoreNames.contains(DB_STORE)){
-          const store = d.createObjectStore(DB_STORE,{keyPath:'id'});
-        }
-      }
-      r.onsuccess = e => { db = e.target.result; res(db); }
-      r.onerror = e => rej(e);
-    })
+  // ---------- Utilities ----------
+  const uid =()=> 'id-'+Math.random().toString(36).slice(2,9);
+  const toastWrap = document.getElementById('toasts');
+  function showToast(txt,{type='success',timeout=3000}={}){
+    const t = document.createElement('div'); t.className='toast '+(type==='info'?'info':type==='danger'?'danger':'');
+    const icon = document.createElement('span'); icon.className='icon'; icon.innerHTML = type==='danger' ? '⚠️' : type==='info' ? 'ℹ️' : '✅';
+    const txtEl = document.createElement('div'); txtEl.textContent = txt;
+    t.appendChild(icon); t.appendChild(txtEl); toastWrap.appendChild(t);
+    setTimeout(()=>{ t.style.opacity=0; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400); },timeout);
   }
-  function put(item){
-    return new Promise((res,rej)=>{
-      const tx = db.transaction(DB_STORE,'readwrite');
-      const s = tx.objectStore(DB_STORE);
-      s.put(item);
-      tx.oncomplete = ()=>res(item);
-      tx.onerror = e=>rej(e);
-    })
-  }
-  function get(id){
-    return new Promise((res,rej)=>{
-      const tx = db.transaction(DB_STORE,'readonly');
-      const s = tx.objectStore(DB_STORE);
-      const req = s.get(id);
-      req.onsuccess = ()=>res(req.result);
-      req.onerror = e=>rej(e);
-    })
-  }
-  function getAll(){
-    return new Promise((res,rej)=>{
-      const tx = db.transaction(DB_STORE,'readonly');
-      const s = tx.objectStore(DB_STORE);
-      const req = s.getAll();
-      req.onsuccess = ()=>res(req.result||[]);
-      req.onerror = e=>rej(e);
-    })
-  }
-  function del(id){
-    return new Promise((res,rej)=>{
-      const tx = db.transaction(DB_STORE,'readwrite');
-      const s = tx.objectStore(DB_STORE);
-      s.delete(id);
-      tx.oncomplete = ()=>res();
-      tx.onerror = e=>rej(e);
+
+  // Confirm modal (replaces window.confirm)
+  function showConfirm({title='Confirm',message='Are you sure?',confirmText='Yes',cancelText='Cancel'}){
+    return new Promise(res=>{
+      const backdrop = document.createElement('div'); backdrop.className='modal-backdrop';
+      const modal = document.createElement('div'); modal.className='modal';
+      modal.innerHTML = `<h3 style="margin:0 0 8px">${title}</h3><p style="margin:0 0 12px;color:var(--muted)">${message}</p>`;
+      const actions = document.createElement('div'); actions.style.display='flex'; actions.style.gap='8px'; actions.style.justifyContent='flex-end';
+      const cancelBtn = document.createElement('button'); cancelBtn.className='btn'; cancelBtn.textContent=cancelText; cancelBtn.onclick=()=>{ backdrop.remove(); res(false); };
+      const okBtn = document.createElement('button'); okBtn.className='btn primary'; okBtn.textContent=confirmText; okBtn.onclick=()=>{ backdrop.remove(); res(true); };
+      actions.appendChild(cancelBtn); actions.appendChild(okBtn); modal.appendChild(actions); backdrop.appendChild(modal); document.body.appendChild(backdrop);
     })
   }
 
-  // ======= App state & helpers =======
-  const uid = ()=>'id-'+Math.random().toString(36).slice(2,9);
-  let state = {folders:[],notes:[],selectedFolder:null,selectedNote:null};
+  // ---------- IndexedDB simple wrapper ----------
+  const DB_NAME='richnotes-db'; const DB_STORE='items'; let db;
+  function openDB(){ return new Promise((res,rej)=>{ const r=indexedDB.open(DB_NAME,1); r.onupgradeneeded = e=>{ const d=e.target.result; if(!d.objectStoreNames.contains(DB_STORE)) d.createObjectStore(DB_STORE,{keyPath:'id'}); } r.onsuccess=e=>{ db=e.target.result; res(db); } r.onerror=e=>rej(e); }) }
+  function put(item){ return new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readwrite'); const s=tx.objectStore(DB_STORE); s.put(item); tx.oncomplete=()=>res(item); tx.onerror=e=>rej(e); }) }
+  function get(id){ return new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readonly'); const s=tx.objectStore(DB_STORE); const rq=s.get(id); rq.onsuccess=()=>res(rq.result); rq.onerror=e=>rej(e); }) }
+  function getAll(){ return new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readonly'); const s=tx.objectStore(DB_STORE); const rq=s.getAll(); rq.onsuccess=()=>res(rq.result||[]); rq.onerror=e=>rej(e); }) }
+  function del(id){ return new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readwrite'); const s=tx.objectStore(DB_STORE); s.delete(id); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e); }) }
 
-  // Default structure if empty
-  function makeRootIfEmpty(){
-    return getAll().then(items=>{
-      if(items.length===0){
-        const rootFolder = {id:uid(),type:'folder',title:'All Notes',parent:null,children:[]};
-        put(rootFolder).then(()=>loadData());
-      } else loadData();
-    })
-  }
+  // ---------- App state ----------
+  let state = {folders:[],notes:[],selectedFolder:null,selectedNote:null,flatFolderOrder:[]};
 
-  async function loadData(){
-    const items = await getAll();
-    state.folders = items.filter(i=>i.type==='folder');
-    state.notes = items.filter(i=>i.type==='note');
-    renderFolders();
-    renderNotes();
-  }
+  async function makeRootIfEmpty(){ const items = await getAll(); if(items.length===0){ const root={id:uid(),type:'folder',title:'All Notes',parent:null,createdAt:Date.now(),updatedAt:Date.now()}; await put(root); await loadData(); } else await loadData(); }
+  async function loadData(){ const items = await getAll(); state.folders = items.filter(i=>i.type==='folder'); state.notes = items.filter(i=>i.type==='note'); state.flatFolderOrder = state.folders.map(f=>f.id); renderFolders(); renderNotes(); }
 
-  function folderChildren(folderId){
-    return state.folders.filter(f=>f.parent===folderId);
-  }
-  function notesInFolder(folderId){
-    return state.notes.filter(n=>n.folder===folderId);
-  }
+  // ---------- Rendering ----------
+  const foldersEl = document.getElementById('folders'); const notesListEl = document.getElementById('notesList'); const currentFolderTitle = document.getElementById('currentFolderTitle'); const notesCountEl = document.getElementById('notesCount');
 
-  // ======= Rendering UI =======
-  const foldersEl = document.getElementById('folders');
-  const notesListEl = document.getElementById('notesList');
-  const currentFolderTitle = document.getElementById('currentFolderTitle');
-  const notesCountEl = document.getElementById('notesCount');
-
-  function renderFolders(){
-    foldersEl.innerHTML='';
-    // find roots
-    const roots = state.folders.filter(f=>!f.parent);
-    roots.forEach(r=>{
-      const div = createFolderNode(r,0);
-      foldersEl.appendChild(div);
-    })
-  }
+  function renderFolders(){ foldersEl.innerHTML=''; const roots = state.folders.filter(f=>!f.parent); roots.forEach(r=> foldersEl.appendChild(createFolderNode(r,0))); }
 
   function createFolderNode(folder,level){
-    const wr = document.createElement('div');
-    wr.className='tree-node';
-    wr.style.paddingLeft = (level*12)+'px';
-    const inner = document.createElement('div');
-    inner.className='folder';
+    const wr = document.createElement('div'); wr.className='tree-node'; wr.style.paddingLeft=(level*12)+'px';
+    const inner = document.createElement('div'); inner.className='folder'; inner.setAttribute('draggable','true'); inner.dataset.id = folder.id;
+
+    inner.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/folder',folder.id); inner.classList.add('dragging'); });
+    inner.addEventListener('dragend',e=>{ inner.classList.remove('dragging'); [...foldersEl.querySelectorAll('.drop-target')].forEach(x=>x.classList.remove('drop-target')); });
+    inner.addEventListener('dragover',e=>{ e.preventDefault(); inner.classList.add('drop-target'); });
+    inner.addEventListener('dragleave',e=>{ inner.classList.remove('drop-target'); });
+    inner.addEventListener('drop',async e=>{ e.preventDefault(); const srcId = e.dataTransfer.getData('text/folder'); if(srcId && srcId!==folder.id){ const src = await get(srcId); if(src){ src.parent = folder.id; src.updatedAt = Date.now(); await put(src); await loadData(); showToast('Moved folder'); } } inner.classList.remove('drop-target'); });
+
     const left = document.createElement('div'); left.className='left';
-    const name = document.createElement('div'); name.className='name'; name.textContent = folder.title;
-    name.onclick = ()=>{ state.selectedFolder = folder.id; state.selectedNote=null; renderNotes(); highlightFolder(folder.id); }
+    const name = document.createElement('div'); name.className='name'; name.innerHTML=`<strong>${folder.title}</strong>`;
+    name.tabIndex=0;
+    name.onclick = ()=>{ state.selectedFolder = folder.id; state.selectedNote = null; renderNotes(); highlightFolder(folder.id); }
+    name.addEventListener('keydown',e=>{ if(e.key==='Enter'){ name.click(); } if(e.key==='Delete'){ promptDeleteFolder(folder.id); } });
+
     left.appendChild(name);
     const actions = document.createElement('div'); actions.className='actions';
-    const addChild = document.createElement('button'); addChild.className='tiny btn'; addChild.textContent='+'; addChild.title='Add subfolder';
-    addChild.onclick = (e)=>{ e.stopPropagation(); const title=prompt('Subfolder name','New Folder'); if(title) createFolder(title,folder.id); }
-    const rename = document.createElement('button'); rename.className='tiny btn'; rename.textContent='✎'; rename.title='Rename'; rename.onclick=(e)=>{ e.stopPropagation(); const t=prompt('Rename folder',folder.title); if(t) renameFolder(folder.id,t);} 
-    const delBtn = document.createElement('button'); delBtn.className='tiny btn'; delBtn.textContent='🗑'; delBtn.title='Delete'; delBtn.onclick=(e)=>{e.stopPropagation(); if(confirm('Delete folder and all inside?')) deleteFolder(folder.id)}
-    actions.appendChild(addChild); actions.appendChild(rename); actions.appendChild(delBtn);
+    const addChild = document.createElement('button'); addChild.className='tiny btn'; addChild.textContent='+'; addChild.title='Add subfolder'; addChild.onclick = e=>{ e.stopPropagation(); const title=prompt('Subfolder name','New Folder'); if(title) createFolder(title,folder.id); }
+    const newNote = document.createElement('button'); newNote.className='tiny btn'; newNote.textContent='✚'; newNote.title='New note here'; newNote.onclick = e=>{ e.stopPropagation(); createNote(folder.id); }
+    const rename = document.createElement('button'); rename.className='tiny btn'; rename.textContent='✎'; rename.title='Rename'; rename.onclick = e=>{ e.stopPropagation(); const t=prompt('Rename folder',folder.title); if(t) renameFolder(folder.id,t); }
+    const delBtn = document.createElement('button'); delBtn.className='tiny btn'; delBtn.textContent='🗑'; delBtn.title='Delete'; delBtn.onclick = e=>{ e.stopPropagation(); promptDeleteFolder(folder.id); }
 
-    inner.appendChild(left); inner.appendChild(actions);
-    wr.appendChild(inner);
+    actions.appendChild(addChild); actions.appendChild(newNote); actions.appendChild(rename); actions.appendChild(delBtn);
+    inner.appendChild(left); inner.appendChild(actions); wr.appendChild(inner);
 
-    // children
-    const children = folderChildren(folder.id);
-    children.forEach(c=>{
-      wr.appendChild(createFolderNode(c,level+1));
-    })
+    const children = state.folders.filter(f=>f.parent===folder.id);
+    children.forEach(c=> wr.appendChild(createFolderNode(c,level+1)));
     return wr;
   }
 
-  function highlightFolder(id){
-    [...foldersEl.querySelectorAll('.folder .name')].forEach(n=>n.style.fontWeight='normal');
-    const el = [...foldersEl.querySelectorAll('.folder')].find(d=>d.querySelector('.name') && d.querySelector('.name').textContent===(state.folders.find(f=>f.id===id)?.title || ''));
-    if(el) el.querySelector('.name').style.fontWeight='700';
-  }
+  function highlightFolder(id){ [...foldersEl.querySelectorAll('.folder .name')].forEach(n=>n.style.fontWeight='normal'); const el = [...foldersEl.querySelectorAll('.folder')].find(d=>d.dataset.id===id); if(el) el.querySelector('.name').style.fontWeight='700'; }
 
-  function renderNotes(){
-    const folderId = state.selectedFolder || (state.folders[0] && state.folders[0].id);
-    const folder = state.folders.find(f=>f.id===folderId);
-    currentFolderTitle.textContent = folder?folder.title:'All Notes';
-    const list = notesInFolder(folderId || null);
-    notesListEl.innerHTML='';
-    notesCountEl.textContent = list.length + ' notes';
-    list.sort((a,b)=>b.updatedAt - a.updatedAt).forEach(n=>{
-      const it = document.createElement('div'); it.className='note-item';
-      it.innerHTML = `<strong>${n.title||'(untitled)'}</strong><div class='muted small'>${new Date(n.updatedAt).toLocaleString()}</div>`;
-      it.onclick = ()=>{ openNote(n.id); [...notesListEl.querySelectorAll('.note-item')].forEach(x=>x.classList.remove('active')); it.classList.add('active'); }
-      notesListEl.appendChild(it);
-    })
-    // if no notes show placeholder
-    if(list.length===0){ notesListEl.innerHTML='<div class="muted" style="padding:20px">No notes in this folder. Click + Note to create one.</div>' }
-  }
+  function renderNotes(){ const folderId = state.selectedFolder || (state.folders[0] && state.folders[0].id); const folder = state.folders.find(f=>f.id===folderId); currentFolderTitle.textContent = folder?folder.title:'All Notes'; const list = state.notes.filter(n=>n.folder===folderId); notesListEl.innerHTML=''; notesCountEl.textContent = list.length + ' notes'; list.sort((a,b)=>b.updatedAt - a.updatedAt).forEach(n=>{ const it = document.createElement('div'); it.className='note-item'; it.dataset.id = n.id; it.innerHTML = `<strong>${n.title||'(untitled)'}</strong><div class='muted small'>${new Date(n.updatedAt).toLocaleString()}</div>`; it.tabIndex=0; it.onclick=()=>{ openNote(n.id); [...notesListEl.querySelectorAll('.note-item')].forEach(x=>x.classList.remove('active')); it.classList.add('active'); };
+      it.addEventListener('keydown',e=>{ if(e.key==='Enter') it.click(); if(e.key==='Delete') promptDeleteNote(n.id); });
+      notesListEl.appendChild(it); }); if(list.length===0) notesListEl.innerHTML='<div class="muted" style="padding:20px">No notes in this folder. Use + New to add one.</div>' }
 
-  // ======= CRUD =======
-  async function createFolder(title,parent=null){
-    const f={id:uid(),type:'folder',title,parent,children:[],createdAt:Date.now(),updatedAt:Date.now()};
-    await put(f); await loadData();
-  }
-  async function renameFolder(id,title){ const f = await get(id); f.title=title; f.updatedAt=Date.now(); await put(f); await loadData(); }
-  async function deleteFolder(id){
-    // delete folder and all nested folders and notes
-    const toDel = [id];
-    for(let i=0;i<toDel.length;i++){ const cur = toDel[i]; const subs = state.folders.filter(ff=>ff.parent===cur).map(s=>s.id); toDel.push(...subs); }
-    // delete notes in those folders
-    for(const note of state.notes.filter(n=>toDel.includes(n.folder))){ await del(note.id); }
-    for(const fid of toDel){ await del(fid); }
-    await loadData();
-  }
+  // ---------- CRUD ----------
+  async function createFolder(title,parent=null){ const f={id:uid(),type:'folder',title,parent,createdAt:Date.now(),updatedAt:Date.now()}; await put(f); await loadData(); showToast('Folder created'); }
+  async function renameFolder(id,title){ const f = await get(id); f.title = title; f.updatedAt = Date.now(); await put(f); await loadData(); showToast('Folder renamed'); }
+  async function promptDeleteFolder(id){ const ok = await showConfirm({title:'Delete folder','message':'Delete folder and all contents? This cannot be undone.',confirmText:'Delete',cancelText:'Cancel'}); if(ok) deleteFolder(id); }
+  async function deleteFolder(id){ const toDel=[id]; for(let i=0;i<toDel.length;i++){ const cur=toDel[i]; const subs = state.folders.filter(ff=>ff.parent===cur).map(s=>s.id); toDel.push(...subs); } for(const note of state.notes.filter(n=>toDel.includes(n.folder))){ await del(note.id); } for(const fid of toDel){ await del(fid); } await loadData(); showToast('Folder deleted',{type:'danger'}); }
 
-  async function createNote(folderId){
-    const n={id:uid(),type:'note',title:'New Note',folder:folderId,content:'',createdAt:Date.now(),updatedAt:Date.now()};
-    await put(n); await loadData(); openNote(n.id);
-  }
+  async function createNote(folderId){ const n={id:uid(),type:'note',title:'New Note',folder:folderId,content:'',createdAt:Date.now(),updatedAt:Date.now()}; await put(n); await loadData(); openNote(n.id); showToast('Note created'); }
+  async function openNote(id){ const n = await get(id); if(!n) return; state.selectedNote = id; document.getElementById('noteTitle').value = n.title; document.getElementById('content').innerHTML = n.content || ''; document.getElementById('noteMeta').textContent = 'Updated: '+ new Date(n.updatedAt).toLocaleString(); }
+  async function saveCurrentNote(){ if(!state.selectedNote){ showToast('Select or create a note first',{type:'info'}); return; } const id = state.selectedNote; const n = await get(id); n.title = document.getElementById('noteTitle').value || 'Untitled'; n.content = document.getElementById('content').innerHTML; n.updatedAt = Date.now(); await put(n); await loadData(); document.getElementById('noteMeta').textContent = 'Saved: '+new Date(n.updatedAt).toLocaleString(); showToast('Saved'); }
+  async function promptDeleteNote(id){ const ok = await showConfirm({title:'Delete note','message':'Delete this note?','confirmText':'Delete','cancelText':'Cancel'}); if(ok) deleteNote(id); }
+  async function deleteNote(id){ await del(id); if(state.selectedNote===id) state.selectedNote=null; await loadData(); document.getElementById('noteTitle').value=''; document.getElementById('content').innerHTML=''; showToast('Note deleted',{type:'danger'}); }
 
-  async function openNote(id){
-    const n = await get(id); if(!n) return;
-    state.selectedNote = id;
-    document.getElementById('noteTitle').value = n.title;
-    document.getElementById('content').innerHTML = n.content || '';
-    document.getElementById('noteMeta').textContent = 'Updated: '+ new Date(n.updatedAt).toLocaleString();
-  }
+  // ---------- Editor commands ----------
+  document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',e=>{ const cmd=e.currentTarget.dataset.cmd; if(cmd==='h1') document.execCommand('formatBlock',false,'h1'); else if(cmd==='h2') document.execCommand('formatBlock',false,'h2'); else if(cmd==='ol') document.execCommand('insertOrderedList'); else if(cmd==='ul') document.execCommand('insertUnorderedList'); else if(cmd==='code') document.execCommand('formatBlock',false,'pre'); else document.execCommand(cmd); }))
+  document.getElementById('fontSizeSelect').addEventListener('change',e=>{ document.getElementById('content').style.fontSize = e.target.value; })
 
-  async function saveCurrentNote(){
-    if(!state.selectedNote){ alert('Select a note first or create a new one.'); return; }
-    const id = state.selectedNote; const n = await get(id);
-    n.title = document.getElementById('noteTitle').value || 'Untitled';
-    n.content = document.getElementById('content').innerHTML;
-    n.updatedAt = Date.now();
-    await put(n);
-    await loadData();
-    document.getElementById('noteMeta').textContent = 'Saved: '+ new Date(n.updatedAt).toLocaleString();
-  }
-
-  async function deleteCurrentNote(){ if(!state.selectedNote) return alert('Select a note to delete'); if(!confirm('Delete this note?')) return; await del(state.selectedNote); state.selectedNote=null; await loadData(); document.getElementById('noteTitle').value=''; document.getElementById('content').innerHTML=''; }
-
-  // ======= Editor features =======
-  document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',e=>{
-    const cmd = e.currentTarget.dataset.cmd;
-    if(cmd==='h1') document.execCommand('formatBlock',false,'h1');
-    else if(cmd==='h2') document.execCommand('formatBlock',false,'h2');
-    else if(cmd==='ol') document.execCommand('insertOrderedList');
-    else if(cmd==='ul') document.execCommand('insertUnorderedList');
-    else if(cmd==='code'){
-      document.execCommand('formatBlock',false,'pre');
-    } else document.execCommand(cmd);
-  }))
-
-  document.getElementById('fontSizeSelect').addEventListener('change',e=>{
-    document.getElementById('content').style.fontSize = e.target.value;
-  })
-
-  // handle paste and drop images
-  const contentEl = document.getElementById('content');
-  contentEl.addEventListener('paste',async e=>{
-    const items = e.clipboardData && e.clipboardData.items;
-    if(!items) return;
-    for(const it of items){ if(it.type.indexOf('image')!==-1){ const file = it.getAsFile(); insertImageFile(file); e.preventDefault(); return; }}
-  })
-  contentEl.addEventListener('drop',async e=>{
-    e.preventDefault();
-    const files = e.dataTransfer.files;
-    if(files.length) for(const f of files){ if(f.type.startsWith('image/')) await insertImageFile(f); }
-  })
+  // paste & drop images
+  const contentEl = document.getElementById('content'); contentEl.addEventListener('paste',async e=>{ const items = e.clipboardData && e.clipboardData.items; if(!items) return; for(const it of items){ if(it.type.indexOf('image')!==-1){ const file = it.getAsFile(); insertImageFile(file); e.preventDefault(); return; }} });
+  contentEl.addEventListener('drop',async e=>{ e.preventDefault(); const files = e.dataTransfer.files; if(files.length) for(const f of files){ if(f.type.startsWith('image/')) await insertImageFile(f); } });
   contentEl.addEventListener('dragover',e=>e.preventDefault());
 
-  function insertImageFile(file){
-    return new Promise((res,rej)=>{
-      const r = new FileReader(); r.onload = async ()=>{
-        const data = r.result; // base64
-        const imgId = uid();
-        // store image as an item type 'asset'
-        await put({id:imgId,type:'asset',mime:file.type,data,createdAt:Date.now()});
-        // insert into editor
-        const img = document.createElement('img'); img.src=data; img.style.maxWidth='100%'; img.style.borderRadius='8px';
-        // wrap
-        const wrapper = document.createElement('div'); wrapper.appendChild(img);
-        const sel = window.getSelection();
-        if(!sel.rangeCount){ contentEl.appendChild(wrapper); } else {
-          const range = sel.getRangeAt(0); range.deleteContents(); range.insertNode(wrapper);
-        }
-        res();
-      }
-      r.readAsDataURL(file);
-    })
-  }
+  function insertImageFile(file){ return new Promise((res,rej)=>{ const r = new FileReader(); r.onload = async ()=>{ const data = r.result; const imgId = uid(); await put({id:imgId,type:'asset',mime:file.type,data,createdAt:Date.now()}); const img = document.createElement('img'); img.src = data; img.style.maxWidth='100%'; img.style.borderRadius='8px'; const wrapper = document.createElement('div'); wrapper.appendChild(img); const sel = window.getSelection(); if(!sel.rangeCount){ contentEl.appendChild(wrapper); } else { const range = sel.getRangeAt(0); range.deleteContents(); range.insertNode(wrapper); } res(); showToast('Image added'); }; r.readAsDataURL(file); }) }
+
+  // ---------- Shortcuts & keyboard nav ----------
+  window.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); saveCurrentNote(); }
+    // navigation
+    if(e.key==='ArrowDown'){ focusNext(); }
+    if(e.key==='ArrowUp'){ focusPrev(); }
+    if(e.key==='Delete'){ // delete focused folder/note
+      const f = document.activeElement; if(f && f.classList.contains('note-item')){ const id = f.dataset.id; promptDeleteNote(id); }
+      const fn = document.activeElement.closest && document.activeElement.closest('.folder'); // not reliable
+    }
+  });
+
+  function focusNext(){ const focusables = [...document.querySelectorAll('.note-item, .folder .name')]; const idx = focusables.indexOf(document.activeElement); const next = focusables[idx+1] || focusables[0]; if(next) next.focus(); }
+  function focusPrev(){ const focusables = [...document.querySelectorAll('.note-item, .folder .name')]; const idx = focusables.indexOf(document.activeElement); const prev = focusables[idx-1] || focusables[focusables.length-1]; if(prev) prev.focus(); }
+
+  // ---------- Toolbar actions ----------
+  document.getElementById('newFolderBtn').addEventListener('click',async ()=>{ const t = prompt('Folder name','New Folder'); if(t) await createFolder(t); });
+  document.getElementById('globalNewNote').addEventListener('click',()=>{ const folder = state.selectedFolder || (state.folders[0] && state.folders[0].id); createNote(folder); });
+  document.getElementById('saveBtn').addEventListener('click',saveCurrentNote);
+  document.getElementById('deleteNoteBtn').addEventListener('click',()=>{ if(!state.selectedNote) return showToast('Select a note to delete',{type:'info'}); promptDeleteNote(state.selectedNote); });
+  document.getElementById('renameFolderBtn').addEventListener('click',()=>{ const id = state.selectedFolder || (state.folders[0] && state.folders[0].id); if(!id) return showToast('Select a folder',{type:'info'}); const t = prompt('Rename folder', state.folders.find(f=>f.id===id)?.title); if(t) renameFolder(id,t); });
+  document.getElementById('deleteFolderBtn').addEventListener('click',()=>{ const id = state.selectedFolder || (state.folders[0] && state.folders[0].id); if(!id) return showToast('Select folder',{type:'info'}); promptDeleteFolder(id); });
+
+  document.getElementById('exportNoteBtn').addEventListener('click',async ()=>{ if(!state.selectedNote) return showToast('Select a note to export',{type:'info'}); const n = await get(state.selectedNote); const blob = new Blob([JSON.stringify(n)],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = (n.title||'note')+'.json'; a.click(); URL.revokeObjectURL(url); showToast('Note exported'); });
+
+  document.getElementById('fileInput').addEventListener('change',async e=>{ const f = e.target.files[0]; if(!f) return; const txt = await f.text(); try{ const data = JSON.parse(txt); for(const it of data) await put(it); showToast('Imported '+data.length+' items'); await loadData(); }catch(err){ showToast('Invalid JSON',{type:'danger'}); } e.target.value=''; });
 
   document.getElementById('insertImageBtn').addEventListener('click',()=> document.getElementById('imageInput').click());
-  document.getElementById('imageInput').addEventListener('change',async e=>{ const f = e.target.files[0]; if(f) await insertImageFile(f); e.target.value=''; })
-
-  // shortcuts: Ctrl+S to save
-  window.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); saveCurrentNote(); } })
-
-  // ======= Toolbar actions =======
-  document.getElementById('newFolderBtn').addEventListener('click',()=>{ const t = prompt('Folder name','New Folder'); if(t){ createFolder(t); }})
-  document.getElementById('newNoteBtn').addEventListener('click',()=>{
-    const folder = state.selectedFolder || (state.folders[0] && state.folders[0].id);
-    createNote(folder);
-  })
-  document.getElementById('saveBtn').addEventListener('click',saveCurrentNote);
-  document.getElementById('deleteNoteBtn').addEventListener('click',deleteCurrentNote);
-
-  document.getElementById('exportBtn').addEventListener('click',async ()=>{
-    const all = await getAll();
-    const blob = new Blob([JSON.stringify(all)],{type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download='richnotes-export.json'; a.click();
-    URL.revokeObjectURL(url);
-  })
-
-  document.getElementById('fileInput').addEventListener('change',async e=>{
-    const f = e.target.files[0]; if(!f) return; const txt = await f.text(); try{ const data = JSON.parse(txt); for(const it of data) await put(it); alert('Imported '+data.length+' items'); await loadData(); }catch(err){ alert('Invalid JSON'); }
-    e.target.value='';
-  })
-
-  document.getElementById('importBtn').addEventListener('click',()=> document.getElementById('fileInput').click());
-
-  document.getElementById('exportNoteBtn').addEventListener('click',async ()=>{
-    if(!state.selectedNote) return alert('Select a note'); const n = await get(state.selectedNote); const blob = new Blob([JSON.stringify(n)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=(n.title||'note')+'.json'; a.click(); URL.revokeObjectURL(url);
-  })
-
-  // rename, delete folder buttons
-  document.getElementById('renameFolderBtn').addEventListener('click',()=>{
-    const id = state.selectedFolder || (state.folders[0] && state.folders[0].id); if(!id) return alert('Select a folder'); const t = prompt('Rename folder', state.folders.find(f=>f.id===id)?.title); if(t) renameFolder(id,t);
-  })
-  document.getElementById('deleteFolderBtn').addEventListener('click',()=>{
-    const id = state.selectedFolder || (state.folders[0] && state.folders[0].id); if(!id) return alert('Select folder'); if(confirm('Delete folder and everything inside?')) deleteFolder(id);
-  })
+  document.getElementById('imageInput').addEventListener('change',async e=>{ const f = e.target.files[0]; if(f) await insertImageFile(f); e.target.value=''; });
 
   // search
-  document.getElementById('search').addEventListener('input',e=>{
-    const q = e.target.value.toLowerCase(); if(!q){ renderFolders(); renderNotes(); return; }
-    // filter folders and notes
-    foldersEl.innerHTML='';
-    state.folders.filter(f=>f.title.toLowerCase().includes(q)).forEach(f=> foldersEl.appendChild(createFolderNode(f,0)));
-    notesListEl.innerHTML='';
-    state.notes.filter(n=> (n.title||'').toLowerCase().includes(q) || (n.content||'').toLowerCase().includes(q)).forEach(n=>{
-      const it = document.createElement('div'); it.className='note-item'; it.innerHTML=`<strong>${n.title}</strong><div class='muted small'>${new Date(n.updatedAt).toLocaleString()}</div>`; it.onclick(()=>openNote(n.id)); notesListEl.appendChild(it);
-    })
-  })
+  document.getElementById('search').addEventListener('input',e=>{ const q = e.target.value.toLowerCase(); if(!q){ renderFolders(); renderNotes(); return; } foldersEl.innerHTML=''; state.folders.filter(f=>f.title.toLowerCase().includes(q)).forEach(f=> foldersEl.appendChild(createFolderNode(f,0))); notesListEl.innerHTML=''; state.notes.filter(n=> (n.title||'').toLowerCase().includes(q) || (n.content||'').toLowerCase().includes(q)).forEach(n=>{ const it = document.createElement('div'); it.className='note-item'; it.dataset.id = n.id; it.innerHTML = `<strong>${n.title}</strong><div class='muted small'>${new Date(n.updatedAt).toLocaleString()}</div>`; it.onclick = ()=> openNote(n.id); notesListEl.appendChild(it); }); });
 
-  // simple auto-save every 10s
-  setInterval(()=>{ if(state.selectedNote) saveCurrentNote(); },10000);
+  // theme switcher
+  const themeBtn = document.getElementById('themeBtn'); const body = document.body; const themes = ['dark','light','solar']; let curThemeIdx = 0; themeBtn.addEventListener('click',()=>{ curThemeIdx = (curThemeIdx+1)%themes.length; body.setAttribute('data-theme',themes[curThemeIdx]); showToast('Theme: '+themes[curThemeIdx],{type:'info'}); });
 
-  // export single note single-button
-  document.getElementById('notesList').addEventListener('dblclick',async e=>{ const el = e.target.closest('.note-item'); if(!el) return; const idx = [...notesListEl.children].indexOf(el); const folderId = state.selectedFolder || (state.folders[0] && state.folders[0].id); const list = notesInFolder(folderId||null); const note = list[idx]; if(note) { const blob=new Blob([JSON.stringify(note)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(note.title||'note')+'.json'; a.click(); } })
+  // quick create select
+  document.getElementById('quickCreateSelect').addEventListener('change',e=>{ const t = e.target.value; if(t==='code'){ document.getElementById('content').innerHTML = '<pre>// paste code here
+</pre>'; } else if(t==='todo'){ document.getElementById('content').innerHTML = '<ul><li>[ ] Task 1</li></ul>'; } else document.getElementById('content').innerHTML = ''; });
+
+  // autosave every 15s
+  setInterval(()=>{ if(state.selectedNote) saveCurrentNote(); },15000);
 
   // initial load
-  openDB().then(()=>makeRootIfEmpty());
-
-  // small helper: loadData when window gains focus (in case of changes)
+  openDB().then(()=>makeRootIfEmpty()).catch(()=>showToast('IndexedDB error',{type:'danger'}));
   window.addEventListener('focus',()=>loadData());
   </script>
 </body>
