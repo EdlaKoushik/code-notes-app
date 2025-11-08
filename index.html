@@ -1,929 +1,452 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Notes App</title>
-    <style>
-        :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3a0ca3;
-            --accent-color: #7209b7;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --success-color: #4cc9f0;
-            --warning-color: #f72585;
-            --border-radius: 8px;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f5f7fb;
-            color: var(--dark-color);
-            display: flex;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: 280px;
-            background: white;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            z-index: 10;
-            transition: var(--transition);
-        }
-
-        .logo {
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #eaeaea;
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            margin-left: 10px;
-        }
-
-        .logo-icon {
-            font-size: 1.8rem;
-        }
-
-        .sidebar-menu {
-            padding: 20px 0;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .menu-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .menu-item:hover {
-            background-color: #f0f2f5;
-        }
-
-        .menu-item.active {
-            background-color: #e6f0ff;
-            color: var(--primary-color);
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .menu-item i {
-            margin-right: 12px;
-            font-size: 1.2rem;
-        }
-
-        .folders-section {
-            margin-top: 20px;
-        }
-
-        .section-title {
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .folder {
-            padding: 10px 20px 10px 40px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .folder:hover {
-            background-color: #f0f2f5;
-        }
-
-        .folder.active {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .folder i {
-            margin-right: 10px;
-        }
-
-        .add-folder-btn {
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .add-folder-btn:hover {
-            background-color: #f0f2f5;
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .top-bar {
-            padding: 15px 25px;
-            background: white;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 5;
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            background: #f0f2f5;
-            border-radius: 20px;
-            padding: 8px 15px;
-            width: 300px;
-        }
-
-        .search-bar input {
-            border: none;
-            background: transparent;
-            outline: none;
-            margin-left: 10px;
-            width: 100%;
-        }
-
-        .user-actions {
-            display: flex;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: var(--border-radius);
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-        }
-
-        .btn i {
-            margin-right: 6px;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid #dee2e6;
-            color: #6c757d;
-        }
-
-        .btn-outline:hover {
-            background-color: #f8f9fa;
-        }
-
-        .notes-container {
-            flex-grow: 1;
-            padding: 25px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .notes-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .notes-header h2 {
-            font-size: 1.5rem;
-            color: var(--dark-color);
-        }
-
-        .notes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .note-card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .note-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .note-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            color: var(--dark-color);
-        }
-
-        .note-card p {
-            color: #6c757d;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .note-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: #adb5bd;
-        }
-
-        .note-tag {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--primary-color);
-            color: white;
-            padding: 5px 10px;
-            font-size: 0.7rem;
-            border-bottom-left-radius: var(--border-radius);
-        }
-
-        /* Editor Styles */
-        .editor-container {
-            flex-grow: 1;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .editor-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eaeaea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .editor-title {
-            border: none;
-            font-size: 1.3rem;
-            font-weight: 600;
-            width: 100%;
-            outline: none;
-            padding: 5px 0;
-        }
-
-        .editor-toolbar {
-            padding: 10px 20px;
-            border-bottom: 1px solid #eaeaea;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .toolbar-group {
-            display: flex;
-            border-right: 1px solid #eaeaea;
-            padding-right: 10px;
-            margin-right: 10px;
-        }
-
-        .toolbar-btn {
-            background: none;
-            border: none;
-            padding: 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .toolbar-btn:hover {
-            background-color: #f0f2f5;
-        }
-
-        .editor-content {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            outline: none;
-            line-height: 1.6;
-        }
-
-        .editor-content h1, .editor-content h2, .editor-content h3 {
-            margin: 15px 0 10px 0;
-        }
-
-        .editor-content p {
-            margin-bottom: 10px;
-        }
-
-        .editor-content ul, .editor-content ol {
-            margin-left: 20px;
-            margin-bottom: 10px;
-        }
-
-        .editor-footer {
-            padding: 15px 20px;
-            border-top: 1px solid #eaeaea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-        }
-
-        .modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 500px;
-            padding: 25px;
-            transform: translateY(-20px);
-            transition: var(--transition);
-        }
-
-        .modal.active .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            font-size: 1.3rem;
-            color: var(--dark-color);
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #6c757d;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #dee2e6;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-            }
-            
-            .notes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        /* Icons */
-        .icon {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            stroke-width: 0;
-            stroke: currentColor;
-            fill: currentColor;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rich Notes — Single File App</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1320;--muted:#94a3b8;--accent:#6ee7b7;--panel:#071029}
+    *{box-sizing:border-box;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071029 0%,#071a2b 60%);color:#e6eef6}
+    .app{display:grid;grid-template-columns:320px 340px 1fr;gap:12px;height:100vh;padding:14px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    header h1{font-size:16px;margin:0}
+    .toolbar{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;color:var(--muted);cursor:pointer}
+    .btn:hover{border-color:rgba(255,255,255,0.08);color:#fff}
+    .muted{color:var(--muted);font-size:13px}
+    /* Sidebar tree */
+    .sidebar{display:flex;flex-direction:column;height:100%}
+    .folders{overflow:auto;padding:8px;margin-top:6px}
+    .folder{padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .folder .left{display:flex;gap:8px;align-items:center}
+    .folder .name{cursor:pointer}
+    .folder .actions{display:flex;gap:6px}
+    .tiny{font-size:12px;padding:4px 6px}
+    /* Notes list */
+    .notes-list{display:flex;flex-direction:column;height:100%}
+    .notes-header{display:flex;justify-content:space-between;align-items:center}
+    .list{overflow:auto;margin-top:8px}
+    .note-item{padding:10px;border-radius:8px;margin-bottom:8px;cursor:pointer}
+    .note-item.active{background:linear-gradient(90deg,rgba(255,255,255,0.02),transparent);border:1px solid rgba(255,255,255,0.03)}
+    /* Editor */
+    .editor{display:flex;flex-direction:column;height:100%}
+    .edit-toolbar{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:8px}
+    .editor-area{flex:1;overflow:auto;border-radius:10px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);min-height:200px}
+    .content{min-height:400px;outline:none}
+    /* Tree style */
+    .tree-node{padding-left:12px}
+    .caret{cursor:pointer;user-select:none}
+    .hidden{display:none}
+    /* search */
+    input[type="search"],input[type="text"],select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;color:#e6eef6}
+    .controls{display:flex;gap:8px}
+    .small{font-size:13px}
+    /* responsive */
+    @media (max-width:1000px){.app{grid-template-columns:1fr}.notes-list{display:none}.app>.card:nth-child(2){display:none}}
+  </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <div class="logo-icon">📝</div>
-            <h1>Advanced Notes</h1>
+  <div class="app">
+    <!-- Sidebar: folders tree -->
+    <div class="card sidebar" id="sidebar">
+      <header>
+        <div>
+          <h1>RichNotes</h1>
+          <div class="muted">Local, single-file deploy — GitHub Pages ready</div>
         </div>
-        <div class="sidebar-menu">
-            <div class="menu-item active">
-                <i>📋</i>
-                <span>All Notes</span>
-            </div>
-            <div class="menu-item">
-                <i>⭐</i>
-                <span>Starred</span>
-            </div>
-            <div class="menu-item">
-                <i>🔔</i>
-                <span>Reminders</span>
-            </div>
-            <div class="menu-item">
-                <i>🏷️</i>
-                <span>Tags</span>
-            </div>
-            <div class="menu-item">
-                <i>🗑️</i>
-                <span>Trash</span>
-            </div>
+      </header>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="search" type="search" placeholder="Search notes or folders..." style="flex:1" />
+        <button class="btn tiny" id="exportBtn">Export</button>
+        <button class="btn tiny" id="importBtn">Import</button>
+      </div>
 
-            <div class="folders-section">
-                <div class="section-title">Folders</div>
-                <div class="folder active">
-                    <i>📁</i>
-                    <span>Personal</span>
-                </div>
-                <div class="folder">
-                    <i>📁</i>
-                    <span>Work</span>
-                </div>
-                <div class="folder">
-                    <i>📁</i>
-                    <span>Coding</span>
-                </div>
-                <div class="folder">
-                    <i>📁</i>
-                    <span>Ideas</span>
-                </div>
-                <div class="add-folder-btn">
-                    <i>➕</i>
-                    <span>New Folder</span>
-                </div>
-            </div>
-        </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" id="newFolderBtn">+ Folder</button>
+        <button class="btn" id="newNoteBtn">+ Note</button>
+      </div>
+
+      <div class="folders" id="folders"></div>
+      <div style="margin-top:10px;color:var(--muted);font-size:13px">Tip: drag images or paste screenshots into editor. Data lives locally (IndexedDB).</div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="top-bar">
-            <div class="search-bar">
-                <i>🔍</i>
-                <input type="text" placeholder="Search notes...">
-            </div>
-            <div class="user-actions">
-                <button class="btn btn-outline">
-                    <i>🌙</i>
-                    <span>Theme</span>
-                </button>
-                <button class="btn btn-primary" id="newNoteBtn">
-                    <i>➕</i>
-                    <span>New Note</span>
-                </button>
-            </div>
+    <!-- Notes list -->
+    <div class="card notes-list" id="notesPanel">
+      <div class="notes-header">
+        <div style="display:flex;flex-direction:column">
+          <strong id="currentFolderTitle">All Notes</strong>
+          <span class="muted small" id="notesCount">0 notes</span>
         </div>
-
-        <div class="notes-container">
-            <div class="notes-header">
-                <h2>Recent Notes</h2>
-                <div class="view-options">
-                    <button class="btn btn-outline">
-                        <i>📋</i>
-                        <span>List View</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="notes-grid">
-                <div class="note-card">
-                    <div class="note-tag">Personal</div>
-                    <h3>Meeting Notes</h3>
-                    <p>Discussed project timeline and deliverables for Q3. Need to follow up with design team about the new UI components.</p>
-                    <div class="note-meta">
-                        <span>Yesterday</span>
-                        <span>📎 2</span>
-                    </div>
-                </div>
-                <div class="note-card">
-                    <div class="note-tag">Coding</div>
-                    <h3>React Hooks Guide</h3>
-                    <p>useState, useEffect, useContext, useReducer, useMemo, useCallback, useRef, custom hooks.</p>
-                    <div class="note-meta">
-                        <span>2 days ago</span>
-                        <span>📎 1</span>
-                    </div>
-                </div>
-                <div class="note-card">
-                    <div class="note-tag">Ideas</div>
-                    <h3>App Improvement Ideas</h3>
-                    <p>Dark mode, export functionality, collaboration features, mobile app, AI-powered suggestions.</p>
-                    <div class="note-meta">
-                        <span>Last week</span>
-                        <span>📎 0</span>
-                    </div>
-                </div>
-                <div class="note-card">
-                    <div class="note-tag">Work</div>
-                    <h3>Project Requirements</h3>
-                    <p>User authentication, real-time updates, file uploads, responsive design, accessibility compliance.</p>
-                    <div class="note-meta">
-                        <span>Mar 12</span>
-                        <span>📎 3</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="editor-container">
-                <div class="editor-header">
-                    <input type="text" class="editor-title" placeholder="Note Title" value="Meeting Notes">
-                </div>
-                <div class="editor-toolbar">
-                    <div class="toolbar-group">
-                        <button class="toolbar-btn" data-command="bold" title="Bold">B</button>
-                        <button class="toolbar-btn" data-command="italic" title="Italic">I</button>
-                        <button class="toolbar-btn" data-command="underline" title="Underline">U</button>
-                    </div>
-                    <div class="toolbar-group">
-                        <button class="toolbar-btn" data-command="formatBlock" data-value="h1" title="Heading 1">H1</button>
-                        <button class="toolbar-btn" data-command="formatBlock" data-value="h2" title="Heading 2">H2</button>
-                        <button class="toolbar-btn" data-command="formatBlock" data-value="h3" title="Heading 3">H3</button>
-                    </div>
-                    <div class="toolbar-group">
-                        <button class="toolbar-btn" data-command="insertUnorderedList" title="Bullet List">•</button>
-                        <button class="toolbar-btn" data-command="insertOrderedList" title="Numbered List">1.</button>
-                    </div>
-                    <div class="toolbar-group">
-                        <button class="toolbar-btn" data-command="justifyLeft" title="Align Left">⫷</button>
-                        <button class="toolbar-btn" data-command="justifyCenter" title="Align Center">⫸</button>
-                        <button class="toolbar-btn" data-command="justifyRight" title="Align Right">⫹</button>
-                    </div>
-                    <div class="toolbar-group">
-                        <button class="toolbar-btn" id="insertImage" title="Insert Image">🖼️</button>
-                        <button class="toolbar-btn" id="pasteScreenshot" title="Paste Screenshot">📸</button>
-                    </div>
-                </div>
-                <div class="editor-content" contenteditable="true">
-                    <h2>Project Meeting - March 15, 2023</h2>
-                    <p><strong>Attendees:</strong> John, Sarah, Michael, Lisa</p>
-                    
-                    <h3>Agenda Items:</h3>
-                    <ul>
-                        <li>Q3 Project Timeline Review</li>
-                        <li>Design System Updates</li>
-                        <li>Technical Debt Discussion</li>
-                        <li>Team Resource Allocation</li>
-                    </ul>
-                    
-                    <h3>Action Items:</h3>
-                    <ol>
-                        <li>Sarah to follow up with design team about UI components (Due: March 20)</li>
-                        <li>Michael to create technical specification document (Due: March 22)</li>
-                        <li>John to review resource allocation with HR (Due: March 18)</li>
-                    </ol>
-                    
-                    <p><em>Next meeting scheduled for March 29, 2023</em></p>
-                </div>
-                <div class="editor-footer">
-                    <div class="editor-info">
-                        Last edited: 2 hours ago
-                    </div>
-                    <div class="editor-actions">
-                        <button class="btn btn-outline">Save Draft</button>
-                        <button class="btn btn-primary">Save Note</button>
-                    </div>
-                </div>
-            </div>
+        <div class="controls">
+          <select id="sortSelect">
+            <option value="updated">Sort: Updated</option>
+            <option value="title">Sort: Title</option>
+            <option value="created">Sort: Created</option>
+          </select>
+          <button class="btn" id="renameFolderBtn">Rename</button>
+          <button class="btn" id="deleteFolderBtn">Delete</button>
         </div>
+      </div>
+      <div class="list" id="notesList"></div>
     </div>
 
-    <!-- New Folder Modal -->
-    <div class="modal" id="folderModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Create New Folder</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="form-group">
-                <label for="folderName">Folder Name</label>
-                <input type="text" id="folderName" class="form-control" placeholder="Enter folder name">
-            </div>
-            <div class="form-group">
-                <label for="folderColor">Color</label>
-                <select id="folderColor" class="form-control">
-                    <option value="#4361ee">Blue</option>
-                    <option value="#f72585">Pink</option>
-                    <option value="#4cc9f0">Cyan</option>
-                    <option value="#7209b7">Purple</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline close-modal">Cancel</button>
-                <button class="btn btn-primary" id="createFolder">Create</button>
-            </div>
+    <!-- Editor -->
+    <div class="card editor" id="editorCard">
+      <div class="edit-toolbar" id="editToolbar">
+        <div class="toolbar">
+          <button class="btn" data-cmd="bold">B</button>
+          <button class="btn" data-cmd="italic">I</button>
+          <button class="btn" data-cmd="underline">U</button>
+          <button class="btn" data-cmd="h1">H1</button>
+          <button class="btn" data-cmd="h2">H2</button>
+          <button class="btn" data-cmd="ol">OL</button>
+          <button class="btn" data-cmd="ul">UL</button>
+          <button class="btn" data-cmd="code">Code</button>
+          <button class="btn" id="insertImageBtn">Image</button>
+          <label style="display:flex;align-items:center;gap:6px"><span class="muted">Font</span>
+            <select id="fontSizeSelect">
+              <option value="14px">14</option>
+              <option value="16px" selected>16</option>
+              <option value="18px">18</option>
+              <option value="20px">20</option>
+              <option value="22px">22</option>
+            </select>
+          </label>
         </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <button class="btn" id="saveBtn">Save</button>
+          <button class="btn" id="deleteNoteBtn">Delete</button>
+          <button class="btn" id="exportNoteBtn">Export Note</button>
+        </div>
+      </div>
+
+      <div style="padding:8px 12px;display:flex;gap:8px;align-items:center">
+        <input id="noteTitle" type="text" placeholder="Note title..." style="flex:1" />
+        <div class="muted small" id="noteMeta">new</div>
+      </div>
+
+      <div class="editor-area">
+        <div id="content" class="content" contenteditable="true" spellcheck="false" placeholder="Start typing...">
+        </div>
+      </div>
+
     </div>
+  </div>
 
-    <script>
-        // DOM Elements
-        const newNoteBtn = document.getElementById('newNoteBtn');
-        const folderModal = document.getElementById('folderModal');
-        const closeModalBtns = document.querySelectorAll('.close-modal');
-        const addFolderBtn = document.querySelector('.add-folder-btn');
-        const createFolderBtn = document.getElementById('createFolder');
-        const editorContent = document.querySelector('.editor-content');
-        const toolbarBtns = document.querySelectorAll('.toolbar-btn');
-        const pasteScreenshotBtn = document.getElementById('pasteScreenshot');
-        const insertImageBtn = document.getElementById('insertImage');
+  <input id="fileInput" type="file" accept="application/json" style="display:none" />
+  <input id="imageInput" type="file" accept="image/*" style="display:none" />
 
-        // Event Listeners
-        newNoteBtn.addEventListener('click', createNewNote);
-        addFolderBtn.addEventListener('click', () => {
-            folderModal.classList.add('active');
-        });
-        
-        closeModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                folderModal.classList.remove('active');
-            });
-        });
-        
-        createFolderBtn.addEventListener('click', createNewFolder);
-        
-        // Toolbar functionality
-        toolbarBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const command = btn.dataset.command;
-                const value = btn.dataset.value;
-                
-                if (command === 'formatBlock') {
-                    document.execCommand(command, false, value);
-                } else {
-                    document.execCommand(command, false, null);
-                }
-                
-                editorContent.focus();
-            });
-        });
-        
-        // Insert image functionality
-        insertImageBtn.addEventListener('click', () => {
-            const url = prompt('Enter image URL:');
-            if (url) {
-                document.execCommand('insertImage', false, url);
-            }
-        });
-        
-        // Paste screenshot functionality
-        pasteScreenshotBtn.addEventListener('click', () => {
-            if (!navigator.clipboard) {
-                alert('Clipboard API not supported in your browser');
-                return;
-            }
-            
-            navigator.clipboard.read().then(clipboardItems => {
-                for (const clipboardItem of clipboardItems) {
-                    for (const type of clipboardItem.types) {
-                        if (type.startsWith('image/')) {
-                            clipboardItem.getType(type).then(blob => {
-                                const reader = new FileReader();
-                                reader.onload = function(e) {
-                                    document.execCommand('insertImage', false, e.target.result);
-                                };
-                                reader.readAsDataURL(blob);
-                            });
-                            return;
-                        }
-                    }
-                }
-                alert('No image found in clipboard');
-            }).catch(err => {
-                console.error('Failed to read clipboard contents: ', err);
-                alert('Failed to read clipboard contents');
-            });
-        });
-
-        // Functions
-        function createNewNote() {
-            const notesGrid = document.querySelector('.notes-grid');
-            const newNote = document.createElement('div');
-            newNote.className = 'note-card';
-            newNote.innerHTML = `
-                <div class="note-tag">New</div>
-                <h3>Untitled Note</h3>
-                <p>Start typing your new note...</p>
-                <div class="note-meta">
-                    <span>Just now</span>
-                    <span>📎 0</span>
-                </div>
-            `;
-            notesGrid.insertBefore(newNote, notesGrid.firstChild);
-            
-            // Clear editor and focus
-            document.querySelector('.editor-title').value = 'Untitled Note';
-            editorContent.innerHTML = '<p>Start typing your new note...</p>';
-            editorContent.focus();
-            
-            // Show notification
-            showNotification('New note created');
+  <script>
+  // ======= Simple IndexedDB wrapper =======
+  const DB_NAME = 'richnotes-db';
+  const DB_STORE = 'items';
+  let db;
+  function openDB(){
+    return new Promise((res,rej)=>{
+      const r = indexedDB.open(DB_NAME,1);
+      r.onupgradeneeded = e => {
+        const d = e.target.result;
+        if(!d.objectStoreNames.contains(DB_STORE)){
+          const store = d.createObjectStore(DB_STORE,{keyPath:'id'});
         }
-        
-        function createNewFolder() {
-            const folderName = document.getElementById('folderName').value;
-            const folderColor = document.getElementById('folderColor').value;
-            
-            if (!folderName.trim()) {
-                alert('Please enter a folder name');
-                return;
-            }
-            
-            const foldersSection = document.querySelector('.folders-section');
-            const newFolder = document.createElement('div');
-            newFolder.className = 'folder';
-            newFolder.innerHTML = `
-                <i>📁</i>
-                <span>${folderName}</span>
-            `;
-            
-            // Insert before the "Add Folder" button
-            foldersSection.insertBefore(newFolder, addFolderBtn);
-            
-            // Close modal and reset form
-            folderModal.classList.remove('active');
-            document.getElementById('folderName').value = '';
-            
-            // Show notification
-            showNotification(`Folder "${folderName}" created`);
-        }
-        
-        function showNotification(message) {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: var(--primary-color);
-                color: white;
-                padding: 12px 20px;
-                border-radius: var(--border-radius);
-                box-shadow: var(--shadow);
-                z-index: 1000;
-                transition: var(--transition);
-                transform: translateY(100px);
-                opacity: 0;
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            // Animate in
-            setTimeout(() => {
-                notification.style.transform = 'translateY(0)';
-                notification.style.opacity = '1';
-            }, 10);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                notification.style.transform = 'translateY(100px)';
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
-        }
+      }
+      r.onsuccess = e => { db = e.target.result; res(db); }
+      r.onerror = e => rej(e);
+    })
+  }
+  function put(item){
+    return new Promise((res,rej)=>{
+      const tx = db.transaction(DB_STORE,'readwrite');
+      const s = tx.objectStore(DB_STORE);
+      s.put(item);
+      tx.oncomplete = ()=>res(item);
+      tx.onerror = e=>rej(e);
+    })
+  }
+  function get(id){
+    return new Promise((res,rej)=>{
+      const tx = db.transaction(DB_STORE,'readonly');
+      const s = tx.objectStore(DB_STORE);
+      const req = s.get(id);
+      req.onsuccess = ()=>res(req.result);
+      req.onerror = e=>rej(e);
+    })
+  }
+  function getAll(){
+    return new Promise((res,rej)=>{
+      const tx = db.transaction(DB_STORE,'readonly');
+      const s = tx.objectStore(DB_STORE);
+      const req = s.getAll();
+      req.onsuccess = ()=>res(req.result||[]);
+      req.onerror = e=>rej(e);
+    })
+  }
+  function del(id){
+    return new Promise((res,rej)=>{
+      const tx = db.transaction(DB_STORE,'readwrite');
+      const s = tx.objectStore(DB_STORE);
+      s.delete(id);
+      tx.oncomplete = ()=>res();
+      tx.onerror = e=>rej(e);
+    })
+  }
 
-        // Initialize app with some sample data
-        document.addEventListener('DOMContentLoaded', () => {
-            // Add click events to note cards
-            const noteCards = document.querySelectorAll('.note-card');
-            noteCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    // Remove active class from all cards
-                    noteCards.forEach(c => c.classList.remove('active'));
-                    // Add active class to clicked card
-                    card.classList.add('active');
-                    
-                    // In a real app, you would load the note content here
-                    document.querySelector('.editor-title').value = card.querySelector('h3').textContent;
-                    
-                    // Show notification
-                    showNotification('Note opened');
-                });
-            });
-            
-            // Add click events to folders
-            const folders = document.querySelectorAll('.folder');
-            folders.forEach(folder => {
-                folder.addEventListener('click', () => {
-                    // Remove active class from all folders
-                    folders.forEach(f => f.classList.remove('active'));
-                    // Add active class to clicked folder
-                    folder.classList.add('active');
-                    
-                    // In a real app, you would filter notes by folder here
-                    showNotification(`Showing notes from "${folder.querySelector('span').textContent}"`);
-                });
-            });
-        });
-    </script>
+  // ======= App state & helpers =======
+  const uid = ()=>'id-'+Math.random().toString(36).slice(2,9);
+  let state = {folders:[],notes:[],selectedFolder:null,selectedNote:null};
+
+  // Default structure if empty
+  function makeRootIfEmpty(){
+    return getAll().then(items=>{
+      if(items.length===0){
+        const rootFolder = {id:uid(),type:'folder',title:'All Notes',parent:null,children:[]};
+        put(rootFolder).then(()=>loadData());
+      } else loadData();
+    })
+  }
+
+  async function loadData(){
+    const items = await getAll();
+    state.folders = items.filter(i=>i.type==='folder');
+    state.notes = items.filter(i=>i.type==='note');
+    renderFolders();
+    renderNotes();
+  }
+
+  function folderChildren(folderId){
+    return state.folders.filter(f=>f.parent===folderId);
+  }
+  function notesInFolder(folderId){
+    return state.notes.filter(n=>n.folder===folderId);
+  }
+
+  // ======= Rendering UI =======
+  const foldersEl = document.getElementById('folders');
+  const notesListEl = document.getElementById('notesList');
+  const currentFolderTitle = document.getElementById('currentFolderTitle');
+  const notesCountEl = document.getElementById('notesCount');
+
+  function renderFolders(){
+    foldersEl.innerHTML='';
+    // find roots
+    const roots = state.folders.filter(f=>!f.parent);
+    roots.forEach(r=>{
+      const div = createFolderNode(r,0);
+      foldersEl.appendChild(div);
+    })
+  }
+
+  function createFolderNode(folder,level){
+    const wr = document.createElement('div');
+    wr.className='tree-node';
+    wr.style.paddingLeft = (level*12)+'px';
+    const inner = document.createElement('div');
+    inner.className='folder';
+    const left = document.createElement('div'); left.className='left';
+    const name = document.createElement('div'); name.className='name'; name.textContent = folder.title;
+    name.onclick = ()=>{ state.selectedFolder = folder.id; state.selectedNote=null; renderNotes(); highlightFolder(folder.id); }
+    left.appendChild(name);
+    const actions = document.createElement('div'); actions.className='actions';
+    const addChild = document.createElement('button'); addChild.className='tiny btn'; addChild.textContent='+'; addChild.title='Add subfolder';
+    addChild.onclick = (e)=>{ e.stopPropagation(); const title=prompt('Subfolder name','New Folder'); if(title) createFolder(title,folder.id); }
+    const rename = document.createElement('button'); rename.className='tiny btn'; rename.textContent='✎'; rename.title='Rename'; rename.onclick=(e)=>{ e.stopPropagation(); const t=prompt('Rename folder',folder.title); if(t) renameFolder(folder.id,t);} 
+    const delBtn = document.createElement('button'); delBtn.className='tiny btn'; delBtn.textContent='🗑'; delBtn.title='Delete'; delBtn.onclick=(e)=>{e.stopPropagation(); if(confirm('Delete folder and all inside?')) deleteFolder(folder.id)}
+    actions.appendChild(addChild); actions.appendChild(rename); actions.appendChild(delBtn);
+
+    inner.appendChild(left); inner.appendChild(actions);
+    wr.appendChild(inner);
+
+    // children
+    const children = folderChildren(folder.id);
+    children.forEach(c=>{
+      wr.appendChild(createFolderNode(c,level+1));
+    })
+    return wr;
+  }
+
+  function highlightFolder(id){
+    [...foldersEl.querySelectorAll('.folder .name')].forEach(n=>n.style.fontWeight='normal');
+    const el = [...foldersEl.querySelectorAll('.folder')].find(d=>d.querySelector('.name') && d.querySelector('.name').textContent===(state.folders.find(f=>f.id===id)?.title || ''));
+    if(el) el.querySelector('.name').style.fontWeight='700';
+  }
+
+  function renderNotes(){
+    const folderId = state.selectedFolder || (state.folders[0] && state.folders[0].id);
+    const folder = state.folders.find(f=>f.id===folderId);
+    currentFolderTitle.textContent = folder?folder.title:'All Notes';
+    const list = notesInFolder(folderId || null);
+    notesListEl.innerHTML='';
+    notesCountEl.textContent = list.length + ' notes';
+    list.sort((a,b)=>b.updatedAt - a.updatedAt).forEach(n=>{
+      const it = document.createElement('div'); it.className='note-item';
+      it.innerHTML = `<strong>${n.title||'(untitled)'}</strong><div class='muted small'>${new Date(n.updatedAt).toLocaleString()}</div>`;
+      it.onclick = ()=>{ openNote(n.id); [...notesListEl.querySelectorAll('.note-item')].forEach(x=>x.classList.remove('active')); it.classList.add('active'); }
+      notesListEl.appendChild(it);
+    })
+    // if no notes show placeholder
+    if(list.length===0){ notesListEl.innerHTML='<div class="muted" style="padding:20px">No notes in this folder. Click + Note to create one.</div>' }
+  }
+
+  // ======= CRUD =======
+  async function createFolder(title,parent=null){
+    const f={id:uid(),type:'folder',title,parent,children:[],createdAt:Date.now(),updatedAt:Date.now()};
+    await put(f); await loadData();
+  }
+  async function renameFolder(id,title){ const f = await get(id); f.title=title; f.updatedAt=Date.now(); await put(f); await loadData(); }
+  async function deleteFolder(id){
+    // delete folder and all nested folders and notes
+    const toDel = [id];
+    for(let i=0;i<toDel.length;i++){ const cur = toDel[i]; const subs = state.folders.filter(ff=>ff.parent===cur).map(s=>s.id); toDel.push(...subs); }
+    // delete notes in those folders
+    for(const note of state.notes.filter(n=>toDel.includes(n.folder))){ await del(note.id); }
+    for(const fid of toDel){ await del(fid); }
+    await loadData();
+  }
+
+  async function createNote(folderId){
+    const n={id:uid(),type:'note',title:'New Note',folder:folderId,content:'',createdAt:Date.now(),updatedAt:Date.now()};
+    await put(n); await loadData(); openNote(n.id);
+  }
+
+  async function openNote(id){
+    const n = await get(id); if(!n) return;
+    state.selectedNote = id;
+    document.getElementById('noteTitle').value = n.title;
+    document.getElementById('content').innerHTML = n.content || '';
+    document.getElementById('noteMeta').textContent = 'Updated: '+ new Date(n.updatedAt).toLocaleString();
+  }
+
+  async function saveCurrentNote(){
+    if(!state.selectedNote){ alert('Select a note first or create a new one.'); return; }
+    const id = state.selectedNote; const n = await get(id);
+    n.title = document.getElementById('noteTitle').value || 'Untitled';
+    n.content = document.getElementById('content').innerHTML;
+    n.updatedAt = Date.now();
+    await put(n);
+    await loadData();
+    document.getElementById('noteMeta').textContent = 'Saved: '+ new Date(n.updatedAt).toLocaleString();
+  }
+
+  async function deleteCurrentNote(){ if(!state.selectedNote) return alert('Select a note to delete'); if(!confirm('Delete this note?')) return; await del(state.selectedNote); state.selectedNote=null; await loadData(); document.getElementById('noteTitle').value=''; document.getElementById('content').innerHTML=''; }
+
+  // ======= Editor features =======
+  document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',e=>{
+    const cmd = e.currentTarget.dataset.cmd;
+    if(cmd==='h1') document.execCommand('formatBlock',false,'h1');
+    else if(cmd==='h2') document.execCommand('formatBlock',false,'h2');
+    else if(cmd==='ol') document.execCommand('insertOrderedList');
+    else if(cmd==='ul') document.execCommand('insertUnorderedList');
+    else if(cmd==='code'){
+      document.execCommand('formatBlock',false,'pre');
+    } else document.execCommand(cmd);
+  }))
+
+  document.getElementById('fontSizeSelect').addEventListener('change',e=>{
+    document.getElementById('content').style.fontSize = e.target.value;
+  })
+
+  // handle paste and drop images
+  const contentEl = document.getElementById('content');
+  contentEl.addEventListener('paste',async e=>{
+    const items = e.clipboardData && e.clipboardData.items;
+    if(!items) return;
+    for(const it of items){ if(it.type.indexOf('image')!==-1){ const file = it.getAsFile(); insertImageFile(file); e.preventDefault(); return; }}
+  })
+  contentEl.addEventListener('drop',async e=>{
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if(files.length) for(const f of files){ if(f.type.startsWith('image/')) await insertImageFile(f); }
+  })
+  contentEl.addEventListener('dragover',e=>e.preventDefault());
+
+  function insertImageFile(file){
+    return new Promise((res,rej)=>{
+      const r = new FileReader(); r.onload = async ()=>{
+        const data = r.result; // base64
+        const imgId = uid();
+        // store image as an item type 'asset'
+        await put({id:imgId,type:'asset',mime:file.type,data,createdAt:Date.now()});
+        // insert into editor
+        const img = document.createElement('img'); img.src=data; img.style.maxWidth='100%'; img.style.borderRadius='8px';
+        // wrap
+        const wrapper = document.createElement('div'); wrapper.appendChild(img);
+        const sel = window.getSelection();
+        if(!sel.rangeCount){ contentEl.appendChild(wrapper); } else {
+          const range = sel.getRangeAt(0); range.deleteContents(); range.insertNode(wrapper);
+        }
+        res();
+      }
+      r.readAsDataURL(file);
+    })
+  }
+
+  document.getElementById('insertImageBtn').addEventListener('click',()=> document.getElementById('imageInput').click());
+  document.getElementById('imageInput').addEventListener('change',async e=>{ const f = e.target.files[0]; if(f) await insertImageFile(f); e.target.value=''; })
+
+  // shortcuts: Ctrl+S to save
+  window.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); saveCurrentNote(); } })
+
+  // ======= Toolbar actions =======
+  document.getElementById('newFolderBtn').addEventListener('click',()=>{ const t = prompt('Folder name','New Folder'); if(t){ createFolder(t); }})
+  document.getElementById('newNoteBtn').addEventListener('click',()=>{
+    const folder = state.selectedFolder || (state.folders[0] && state.folders[0].id);
+    createNote(folder);
+  })
+  document.getElementById('saveBtn').addEventListener('click',saveCurrentNote);
+  document.getElementById('deleteNoteBtn').addEventListener('click',deleteCurrentNote);
+
+  document.getElementById('exportBtn').addEventListener('click',async ()=>{
+    const all = await getAll();
+    const blob = new Blob([JSON.stringify(all)],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='richnotes-export.json'; a.click();
+    URL.revokeObjectURL(url);
+  })
+
+  document.getElementById('fileInput').addEventListener('change',async e=>{
+    const f = e.target.files[0]; if(!f) return; const txt = await f.text(); try{ const data = JSON.parse(txt); for(const it of data) await put(it); alert('Imported '+data.length+' items'); await loadData(); }catch(err){ alert('Invalid JSON'); }
+    e.target.value='';
+  })
+
+  document.getElementById('importBtn').addEventListener('click',()=> document.getElementById('fileInput').click());
+
+  document.getElementById('exportNoteBtn').addEventListener('click',async ()=>{
+    if(!state.selectedNote) return alert('Select a note'); const n = await get(state.selectedNote); const blob = new Blob([JSON.stringify(n)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=(n.title||'note')+'.json'; a.click(); URL.revokeObjectURL(url);
+  })
+
+  // rename, delete folder buttons
+  document.getElementById('renameFolderBtn').addEventListener('click',()=>{
+    const id = state.selectedFolder || (state.folders[0] && state.folders[0].id); if(!id) return alert('Select a folder'); const t = prompt('Rename folder', state.folders.find(f=>f.id===id)?.title); if(t) renameFolder(id,t);
+  })
+  document.getElementById('deleteFolderBtn').addEventListener('click',()=>{
+    const id = state.selectedFolder || (state.folders[0] && state.folders[0].id); if(!id) return alert('Select folder'); if(confirm('Delete folder and everything inside?')) deleteFolder(id);
+  })
+
+  // search
+  document.getElementById('search').addEventListener('input',e=>{
+    const q = e.target.value.toLowerCase(); if(!q){ renderFolders(); renderNotes(); return; }
+    // filter folders and notes
+    foldersEl.innerHTML='';
+    state.folders.filter(f=>f.title.toLowerCase().includes(q)).forEach(f=> foldersEl.appendChild(createFolderNode(f,0)));
+    notesListEl.innerHTML='';
+    state.notes.filter(n=> (n.title||'').toLowerCase().includes(q) || (n.content||'').toLowerCase().includes(q)).forEach(n=>{
+      const it = document.createElement('div'); it.className='note-item'; it.innerHTML=`<strong>${n.title}</strong><div class='muted small'>${new Date(n.updatedAt).toLocaleString()}</div>`; it.onclick(()=>openNote(n.id)); notesListEl.appendChild(it);
+    })
+  })
+
+  // simple auto-save every 10s
+  setInterval(()=>{ if(state.selectedNote) saveCurrentNote(); },10000);
+
+  // export single note single-button
+  document.getElementById('notesList').addEventListener('dblclick',async e=>{ const el = e.target.closest('.note-item'); if(!el) return; const idx = [...notesListEl.children].indexOf(el); const folderId = state.selectedFolder || (state.folders[0] && state.folders[0].id); const list = notesInFolder(folderId||null); const note = list[idx]; if(note) { const blob=new Blob([JSON.stringify(note)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(note.title||'note')+'.json'; a.click(); } })
+
+  // initial load
+  openDB().then(()=>makeRootIfEmpty());
+
+  // small helper: loadData when window gains focus (in case of changes)
+  window.addEventListener('focus',()=>loadData());
+  </script>
 </body>
 </html>
